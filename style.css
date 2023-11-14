@@ -1,26 +1,32 @@
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
 }
-
-#grid-container {
-    display: grid;
-    grid-template-columns: repeat(50, 20px);
-    gap: 1px;
-}
-
 .cell {
-    width: 20px;
-    height: 20px;
-}
-
-.senegal-theme {
-    background-color: #fce300; /* Yellow */
-}
-
-.cell.alive {
-    background-color: #008329; /* Green */
-}
+    width: 4px;
+    height: 10px;
+    padding: 4px;
+    border: solid gray 1px;
+  }
+  .filled {
+    background-color: black;
+  }
+  .empty {
+    background-color: white;
+  }
+  table{
+    border: 2px double;
+    border-radius: 40px;
+  }
+  table {
+    border-collapse: collapse;
+  }
+  
+ tr{
+    height: 10px;
+    border: 2px solid #ccc; /* Ajout d'une bordure de 1 pixel solide avec une couleur grise */
+  }

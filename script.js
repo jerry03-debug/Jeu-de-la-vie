@@ -1,88 +1,96 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const conteneurGrille = document.getElementById('grid-container');
-    const tailleGrille = 50;
-    
-    // Créer la grille
-    creerGrille();
+let size = 50;
+let htmlElements;
+let cells;
+let EMPTY = 0;
+let ALIVE = 1;
 
-    // Initialiser le jeu de la vie
-    initialiserJeu();
+// Créer la grille initiale
+function createField() {
+  htmlElements = [];
+  cells = [];
 
-    function creerGrille() {
-        for (let i = 0; i < tailleGrille * tailleGrille; i++) {
-            const cellule = document.createElement('div');
-            cellule.className = 'cellule';
-            conteneurGrille.appendChild(cellule);
-        }
+  let table = document.getElementById('field');
+  for (let y = 0; y < size; y++) {
+    let tr = document.createElement('tr');
+    let tdElements = [];
+    cells.push(new Array(size).fill(EMPTY));
+    htmlElements.push(tdElements);
+    table.appendChild(tr);
 
-        conteneurGrille.addEventListener('click', gererClicCellule);
+    for (let x = 0; x < size; x++) {
+      let td = document.createElement('td');
+      tdElements.push(td);
+      tr.appendChild(td);
     }
+  }
+}
 
-    function initialiserJeu() {
-        const cellules = document.querySelectorAll('.cellule');
-        cellules.forEach(cellule => {
-            // Initialiser les cellules de manière aléatoire
-            cellule.classList.toggle('vivante', Math.random() > 0.7);
-        });
-
-        // Lancer la boucle de jeu
-        setInterval(mettreAJourJeu, 100);
+// Mettre à jour l'affichage de la grille
+function draw() {
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      htmlElements[y][x].setAttribute('class', 'cell ' + (cells[y][x] == 1 ? 'filled' : 'empty'));
     }
+  }
+}
 
-    function mettreAJourJeu() {
-        const cellules = document.querySelectorAll('.cellule');
-        const nouveauxEtats = [];
-
-        cellules.forEach((cellule, index) => {
-            const voisins = obtenirVoisins(index);
-            const voisinsVivants = voisins.filter(n => cellules[n].classList.contains('vivante'));
-
-            if (cellule.classList.contains('vivante')) {
-                // Appliquer les règles de survie
-                if (voisinsVivants.length === 2 || voisinsVivants.length === 3) {
-                    nouveauxEtats[index] = true;
-                } else {
-                    nouveauxEtats[index] = false;
-                }
-            } else {
-                // Appliquer la règle de naissance
-                if (voisinsVivants.length === 3) {
-                    nouveauxEtats[index] = true;
-                } else {
-                    nouveauxEtats[index] = false;
-                }
-            }
-        });
-
-        // Mettre à jour les états des cellules
-        nouveauxEtats.forEach((etat, index) => {
-            cellules[index].classList.toggle('vivante', etat);
-        });
+// Compter le nombre de voisins vivants d'une cellule
+function countNeibhours(x, y) {
+  let count = 0;
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      let nx = (x + dx + size) % size, ny = (y + dy + size) % size;
+      count = count + cells[ny][nx];
     }
+  }
+  return count - cells[y][x];
+}
 
-    function obtenirVoisins(index) {
-        const ligne = Math.floor(index / tailleGrille);
-        const colonne = index % tailleGrille;
-        const voisins = [];
+// Calculer une nouvelle génération en fonction des règles du jeu
+function newGeneration() {
+  let newCells = [];
+  for (let i = 0; i < size; i++) {
+    newCells.push(new Array(size).fill(EMPTY));
+  }
 
-        for (let i = -1; i <= 1; i++) {
-            for (let j = -1; j <= 1; j++) {
-                const ligneVoisin = ligne + i;
-                const colonneVoisin = colonne + j;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      let neibhours = countNeibhours(x, y);
 
-                if (ligneVoisin >= 0 && ligneVoisin < tailleGrille &&
-                    colonneVoisin >= 0 && colonneVoisin < tailleGrille &&
-                    !(i === 0 && j === 0)) {
-                    voisins.push(ligneVoisin * tailleGrille + colonneVoisin);
-                }
-            }
-        }
-
-        return voisins;
+      if (cells[y][x] == EMPTY && neibhours == 3) {
+        newCells[y][x] = ALIVE;
+      }
+      if (cells[y][x] == ALIVE && (neibhours == 2 || neibhours == 3)) {
+        newCells[y][x] = ALIVE;
+      }
     }
+  }
 
-    function gererClicCellule(event) {
-        const celluleClickee = event.target;
-        celluleClickee.classList.toggle('vivante');
-    }
-});
+  cells = newCells;
+  draw();
+}
+
+// Initialiser le jeu
+function init() {
+  createField();
+
+  // Placer aléatoirement 30% de cellules vivantes
+  for (let i = 0; i < Math.floor(size * size * 0.3); i++) {
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * size), y = Math.floor(Math.random() * size);
+      if (cells[y][x] == EMPTY) {
+        cells[y][x] = ALIVE;
+        break;
+      }
+    } while (true);
+  }
+
+  draw();
+
+  // Lancer la boucle de génération automatique à intervalle régulier
+  setInterval(newGeneration, 100);
+}
+
+// Appeler la fonction d'initialisation
+init();
