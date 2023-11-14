@@ -1,0 +1,26 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#grid-container {
+    display: grid;
+    grid-template-columns: repeat(50, 20px);
+    gap: 1px;
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+}
+
+.senegal-theme {
+    background-color: #fce300; /* Yellow */
+}
+
+.cell.alive {
+    background-color: #008329; /* Green */
+}
